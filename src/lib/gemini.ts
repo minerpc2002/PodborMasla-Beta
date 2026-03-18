@@ -74,8 +74,8 @@ function getGeminiClient() {
 }
 
 const FREE_MODELS = [
-  'gemini-3.1-flash-lite-preview',
   'gemini-3-flash-preview',
+  'gemini-3.1-flash-lite-preview',
   'gemini-2.5-flash'
 ];
 
@@ -343,13 +343,12 @@ export async function searchByVin(vin: string, mileage?: string, conditions?: st
    - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
-   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
-   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
-   - If the car is Japanese, also include multiple options from Moly Green.
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
+   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
    - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
+   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
 4. NO Liqui Moly.
-5. OUTPUT: Return JSON (Russian text).`;
+5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array.`;
   } else {
     prompt = `Expert Oil Selector.
 1. Identify: VIN ${vin}. ${vehicleHint ? `Vehicle hint: ${vehicleHint}.` : ''}
@@ -366,13 +365,12 @@ ${ravenolData.substring(0, 50000)}
    - For "factory_viscosity", list ALL viscosities mentioned in the catalog (e.g., "0W-20, 5W-30").
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
-   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
-   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
-   - If the car is Japanese, also include multiple options from Moly Green.
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
+   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
    - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
+   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
 5. NO Liqui Moly.
-6. OUTPUT: Return JSON (Russian text). Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
+6. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array. Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
 
   onStatusChange?.('Анализ данных...');
@@ -383,7 +381,8 @@ ${ravenolData.substring(0, 50000)}
       config: {
         responseMimeType: 'application/json',
         responseSchema: carDataSchema,
-        temperature: 0.3,
+        temperature: 0.4,
+        maxOutputTokens: 8192,
       }
     });
 
@@ -446,13 +445,12 @@ export async function searchByCarDetails(brand: string, model: string, year?: st
     3. RECOMMENDATIONS:
        - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
        - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
-       - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-       - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
-       - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
-       - If the car is Japanese, also include multiple options from Moly Green.
+       - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
+       - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
        - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
+       - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
     4. NO Liqui Moly.
-    5. OUTPUT: Return JSON (Russian text). 
+    5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array.
     6. IMPORTANT: Add a note in the description of the first unit that this data is provided by AI because the official catalog was unreachable.`;
   } else {
     prompt = `Expert Oil Selector.
@@ -470,13 +468,12 @@ ${ravenolData.substring(0, 50000)}
    - For "factory_viscosity", list ALL viscosities mentioned in the catalog (e.g., "0W-20, 5W-30").
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
-   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
-   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
-   - If the car is Japanese, also include multiple options from Moly Green.
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
+   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
    - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
+   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
 4. NO Liqui Moly.
-5. OUTPUT: Return JSON (Russian text). Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
+5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array. Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
 
   onStatusChange?.('Анализ данных...');
@@ -487,7 +484,8 @@ ${ravenolData.substring(0, 50000)}
       config: {
         responseMimeType: 'application/json',
         responseSchema: carDataSchema,
-        temperature: 0.2,
+        temperature: 0.4,
+        maxOutputTokens: 8192,
       }
     });
 
