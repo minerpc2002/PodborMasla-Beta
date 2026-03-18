@@ -23,5 +23,10 @@ export const setupTelegram = () => {
   if (isTelegramWebApp()) {
     WebApp.ready();
     WebApp.expand();
+    WebApp.enableClosingConfirmation();
+    
+    // Set colors to match our dark theme
+    WebApp.setHeaderColor('#000002');
+    WebApp.setBackgroundColor('#000002');
   }
 };

@@ -4,12 +4,13 @@ import { cn } from '../lib/utils';
 import { useEffect, useState } from 'react';
 import { setupTelegram } from '../lib/telegram';
 import AuthModal from './AuthModal';
+import UserMenuModal from './UserMenuModal';
 import PromoModal from './PromoModal';
+import { auth } from '../firebase';
 import FAQModal from './FAQModal';
 import HowItWorksModal from './HowItWorksModal';
 import { useAppStore } from '../store/useAppStore';
 import { motion, AnimatePresence } from 'motion/react';
-import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 
 export default function Layout() {
@@ -19,6 +20,7 @@ export default function Layout() {
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isFAQModalOpen, setIsFAQModalOpen] = useState(false);
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     setupTelegram();
@@ -44,6 +46,11 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen flex-col bg-transparent text-zinc-50 font-sans transition-colors duration-300">
       <AuthModal />
+      <UserMenuModal 
+        isOpen={isUserMenuOpen} 
+        onClose={() => setIsUserMenuOpen(false)} 
+        onOpenPromo={() => setIsPromoModalOpen(true)}
+      />
       <PromoModal isOpen={isPromoModalOpen} onClose={() => setIsPromoModalOpen(false)} />
       <FAQModal isOpen={isFAQModalOpen} onClose={() => setIsFAQModalOpen(false)} />
       <HowItWorksModal isOpen={isHowItWorksOpen} onClose={() => setIsHowItWorksOpen(false)} />
@@ -97,44 +104,40 @@ export default function Layout() {
               <HelpCircle size={20} />
             </motion.button>
 
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsHowItWorksOpen(true)}
-              className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
-              title="Как это работает"
-            >
-              <Info size={20} />
-            </motion.button>
-
-            {userProfile && (
+            {userProfile ? (
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsUserMenuOpen(true)}
+                className="flex items-center gap-2.5 p-1.5 pr-3 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-full transition-all group ml-1"
+              >
+                <div className="relative shrink-0">
+                  <img 
+                    src={auth.currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userProfile.nickname}`} 
+                    alt="Profile" 
+                    className="w-8 h-8 rounded-full border border-white/10 object-cover shadow-sm"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#000002] rounded-full" />
+                </div>
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-xs font-bold text-zinc-100 group-hover:text-blue-400 transition-colors">
+                    {userProfile.nickname}
+                  </span>
+                  <span className="text-[9px] text-zinc-500 uppercase tracking-tighter mt-0.5">
+                    {userProfile.role === 'admin' ? 'Admin' : 'Pro'}
+                  </span>
+                </div>
+              </motion.button>
+            ) : (
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={handleLogout}
-                className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
-                title="Выйти"
+                onClick={() => setIsHowItWorksOpen(true)}
+                className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
+                title="Как это работает"
               >
-                <LogOut size={20} />
-              </motion.button>
-            )}
-
-            {userProfile && (
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsPromoModalOpen(true)}
-                className="flex items-center gap-2 liquid-glass px-3 py-1.5 rounded-2xl shadow-sm hover:bg-zinc-800/50 transition-colors"
-              >
-                <div className="w-5 h-5 bg-blue-900/30 rounded-full flex items-center justify-center">
-                  <User size={12} className="text-blue-400" />
-                </div>
-                <span className="text-xs font-medium max-w-[80px] truncate">{userProfile.nickname}</span>
-                {isPromoActive ? (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" title="PRO Аккаунт" />
-                ) : (
-                  <Gift size={14} className="text-emerald-500" title="Ввести промокод" />
-                )}
+                <Info size={20} />
               </motion.button>
             )}
           </div>

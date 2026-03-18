@@ -353,14 +353,11 @@ export default function Search() {
         <TabsList className="grid w-full grid-cols-2 mb-4 liquid-glass p-1 rounded-2xl">
           <TabsTrigger value="manual" className="flex items-center gap-1.5 rounded-xl transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
             По автомобилю
-            <span className="px-1.5 py-0.5 bg-blue-900/50 text-blue-400 text-[9px] font-bold uppercase tracking-wider rounded-md">
-              Beta
-            </span>
           </TabsTrigger>
           <TabsTrigger value="vin" className="flex items-center gap-1.5 rounded-xl transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
             По VIN коду
-            <span className="px-1.5 py-0.5 bg-purple-900/50 text-purple-400 text-[9px] font-bold uppercase tracking-wider rounded-md">
-              Alpha
+            <span className="px-1.5 py-0.5 bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider rounded-md">
+              Beta
             </span>
           </TabsTrigger>
         </TabsList>
@@ -656,9 +653,9 @@ export default function Search() {
                     <div className="p-4 bg-amber-900/20 border border-amber-800 rounded-2xl flex gap-3">
                       <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                       <div className="space-y-1">
-                        <p className="text-sm font-bold text-amber-300">Внимание: ALPHA версия</p>
+                        <p className="text-sm font-bold text-amber-300">Внимание: BETA версия</p>
                         <p className="text-xs text-amber-400 leading-relaxed">
-                          Поиск по VIN находится в стадии тестирования. Автомобили могут определяться некорректно. 
+                          Поиск по VIN находится в стадии активного тестирования.
                           Рекомендуем проверять результаты или использовать ручной поиск.
                         </p>
                       </div>
@@ -699,7 +696,7 @@ export default function Search() {
                     {renderCommonParams()}
 
                     <Button 
-                      className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl h-14 text-lg font-bold shadow-lg shadow-purple-500/20 transition-all active:scale-95" 
+                      className="w-full mt-4 shimmer-ai-bg hover:opacity-90 text-white rounded-2xl h-14 text-lg font-bold shadow-lg shadow-purple-500/30 transition-all active:scale-95 border border-white/10" 
                       size="lg"
                       disabled={!vin || isSearchingVin}
                       onClick={handleVinSearch}

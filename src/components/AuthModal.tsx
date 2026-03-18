@@ -162,6 +162,9 @@ export default function AuthModal() {
           }
         }
       }
+
+      // Force reload to ensure all states are correctly initialized
+      window.location.reload();
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes('permission')) {

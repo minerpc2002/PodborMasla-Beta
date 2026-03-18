@@ -39,12 +39,16 @@
   }
 }
 
-body {
+html, body {
   -webkit-tap-highlight-color: transparent;
   background-color: #000002;
   transition: background-color 0.3s ease;
   overflow-x: hidden;
+  width: 100%;
+  position: relative;
   color: #f8fafc;
+  /* Prevent bounce effect on iOS which can cause horizontal shift */
+  overscroll-behavior-x: none;
 }
 
 /* Background blobs for liquid feel */
