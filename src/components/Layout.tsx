@@ -104,6 +104,16 @@ export default function Layout() {
               <HelpCircle size={20} />
             </motion.button>
 
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsHowItWorksOpen(true)}
+              className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
+              title="Как это работает"
+            >
+              <Info size={20} />
+            </motion.button>
+
             {userProfile ? (
               <motion.button 
                 whileHover={{ scale: 1.05 }}
@@ -129,17 +139,7 @@ export default function Layout() {
                   </span>
                 </div>
               </motion.button>
-            ) : (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsHowItWorksOpen(true)}
-                className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
-                title="Как это работает"
-              >
-                <Info size={20} />
-              </motion.button>
-            )}
+            ) : null}
           </div>
         </div>
       </motion.header>

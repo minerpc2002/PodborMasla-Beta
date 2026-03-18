@@ -5,8 +5,9 @@ import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Gift, X, CheckCircle2, Clock, Search, Loader2 } from 'lucide-react';
 import { db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { PromoCode } from '../types';
+import { logUserAction } from '../lib/logger';
 
 interface PromoModalProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface PromoModalProps {
 }
 
 export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
-  const { activePromoCode, setActivePromoCode, getSearchStatus } = useAppStore();
+  const { activePromoCode, setActivePromoCode, getSearchStatus, userProfile } = useAppStore();
   const [promoInput, setPromoInput] = useState('');
   const [status, setStatus] = useState({ remainingAttempts: 2, totalAttempts: 2, minutesUntilReset: 0 });
   const [loading, setLoading] = useState(false);
@@ -73,9 +74,21 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
     }
   };
 
-  const applyPromoCode = (promoData: PromoCode) => {
+  const applyPromoCode = async (promoData: PromoCode) => {
     setActivePromoCode(promoData);
     setStatus(getSearchStatus());
+    
+    if (userProfile?.uid) {
+      try {
+        await updateDoc(doc(db, 'users', userProfile.uid), {
+          activePromoCode: promoData
+        });
+        logUserAction('activate_promo', `Активирован код: ${promoData.code}, лимит: ${promoData.maxAttempts}, до: ${new Date(promoData.expiresAt).toLocaleString()}`);
+      } catch (err) {
+        console.error('Failed to save promo code to user profile:', err);
+      }
+    }
+    
     onClose();
   };
 

@@ -8,6 +8,7 @@ import { Select } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { searchByVin, searchByCarDetails, suggestCarBodies, suggestCarModels, suggestCarEngines, suggestEnginePower, suggestTransmissions } from '../lib/gemini';
 import { useAppStore } from '../store/useAppStore';
+import { logUserAction } from '../lib/logger';
 import { motion, AnimatePresence } from 'motion/react';
 
 const POPULAR_BRANDS = [
@@ -159,6 +160,7 @@ export default function Search() {
       const carData = await searchByCarDetails(brand, model, year, body, engine, transmission, mileage, conditions, power, handDrive, fuelType, (status) => setSearchStatus(status));
       recordSearch();
       addDynamicCar(carData);
+      logUserAction('search_manual', `Поиск по авто: ${brand} ${model} ${year} ${body} ${engine} ${transmission}`);
       navigate(`/result/${carData.id}`);
     } catch (error: any) {
       console.error('Manual Search Error:', error);
@@ -189,6 +191,7 @@ export default function Search() {
       const carData = await searchByVin(vin, mileage, conditions, power, handDrive, fuelType, (status) => setSearchStatus(status));
       recordSearch();
       addDynamicCar(carData);
+      logUserAction('search_vin', `Поиск по VIN: ${vin}`);
       navigate(`/result/${carData.id}`);
     } catch (error: any) {
       console.error('VIN Search Error:', error);

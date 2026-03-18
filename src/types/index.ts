@@ -48,6 +48,7 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   createdAt: number;
+  activePromoCode?: PromoCode | null;
 }
 
 export interface PromoCode {

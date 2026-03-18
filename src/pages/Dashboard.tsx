@@ -7,7 +7,8 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Users, Ticket, Plus, Trash2, Shield, ShieldAlert, ShieldCheck, Loader2, User } from 'lucide-react';
+import { Users, Ticket, Plus, Trash2, Shield, ShieldAlert, ShieldCheck, Loader2, User, Search, Crown } from 'lucide-react';
+import UserAdminModal from '../components/UserAdminModal';
 
 export default function Dashboard() {
   const { userProfile } = useAppStore();
@@ -15,6 +16,11 @@ export default function Dashboard() {
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // User list state
+  const [userFilter, setUserFilter] = useState<'all' | 'admin' | 'moderator' | 'pro' | 'user'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
   // Promo code form state
   const [newCode, setNewCode] = useState('');
@@ -117,6 +123,32 @@ export default function Dashboard() {
     }
   };
 
+  const handleUpdateUser = (updatedUser: UserProfile) => {
+    setUsers(users.map(u => u.uid === updatedUser.uid ? updatedUser : u));
+    setSelectedUser(updatedUser);
+  };
+
+  const filteredUsers = users.filter(user => {
+    // Filter by role/status
+    if (userFilter === 'admin' && user.role !== 'admin') return false;
+    if (userFilter === 'moderator' && user.role !== 'moderator') return false;
+    if (userFilter === 'user' && user.role !== 'user') return false;
+    if (userFilter === 'pro') {
+      const isPro = user.activePromoCode && user.activePromoCode.expiresAt > Date.now();
+      if (!isPro) return false;
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return user.nickname.toLowerCase().includes(query) || 
+             user.email.toLowerCase().includes(query) ||
+             user.uid.toLowerCase().includes(query);
+    }
+
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -205,66 +237,102 @@ export default function Dashboard() {
                   <CardDescription>Список всех зарегистрированных пользователей</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                      <Input 
+                        placeholder="Поиск по имени, email или ID..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-black/20 border-white/10"
+                      />
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+                      <Button 
+                        variant={userFilter === 'all' ? 'default' : 'outline'} 
+                        size="sm" 
+                        onClick={() => setUserFilter('all')}
+                        className={userFilter === 'all' ? 'bg-blue-600' : 'border-white/10'}
+                      >
+                        Все
+                      </Button>
+                      <Button 
+                        variant={userFilter === 'admin' ? 'default' : 'outline'} 
+                        size="sm" 
+                        onClick={() => setUserFilter('admin')}
+                        className={userFilter === 'admin' ? 'bg-red-600' : 'border-white/10'}
+                      >
+                        Админ
+                      </Button>
+                      <Button 
+                        variant={userFilter === 'moderator' ? 'default' : 'outline'} 
+                        size="sm" 
+                        onClick={() => setUserFilter('moderator')}
+                        className={userFilter === 'moderator' ? 'bg-blue-600' : 'border-white/10'}
+                      >
+                        Модератор
+                      </Button>
+                      <Button 
+                        variant={userFilter === 'pro' ? 'default' : 'outline'} 
+                        size="sm" 
+                        onClick={() => setUserFilter('pro')}
+                        className={userFilter === 'pro' ? 'bg-amber-600 text-white' : 'border-white/10 text-amber-500'}
+                      >
+                        PRO User
+                      </Button>
+                      <Button 
+                        variant={userFilter === 'user' ? 'default' : 'outline'} 
+                        size="sm" 
+                        onClick={() => setUserFilter('user')}
+                        className={userFilter === 'user' ? 'bg-zinc-600' : 'border-white/10'}
+                      >
+                        Юзер
+                      </Button>
+                    </div>
+                  </div>
+
                   <div className="space-y-3">
-                    {users.map((user) => (
-                      <div key={user.uid} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border border-white/5 gap-4">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-zinc-100 text-base">{user.nickname}</span>
-                          <span className="text-xs text-zinc-400">{user.email}</span>
-                        </div>
-                        <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
-                          <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg">
-                            {user.role === 'admin' && <ShieldAlert size={14} className="text-red-400" />}
-                            {user.role === 'moderator' && <ShieldCheck size={14} className="text-blue-400" />}
-                            {user.role === 'user' && <Users size={14} className="text-zinc-400" />}
-                            <span className={
-                              user.role === 'admin' ? 'text-red-400 text-xs font-bold uppercase tracking-wider' : 
-                              user.role === 'moderator' ? 'text-blue-400 text-xs font-bold uppercase tracking-wider' : 'text-zinc-400 text-xs font-bold uppercase tracking-wider'
-                            }>
-                              {user.role}
-                            </span>
-                          </div>
-                          {isAdmin && (
-                            <div className="flex gap-1.5">
-                              {user.role !== 'admin' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="h-8 text-[10px] px-2.5 border-red-500/30 hover:bg-red-500/10 text-red-400"
-                                  onClick={() => handleUpdateRole(user.uid, 'admin')}
-                                  disabled={actionLoading === user.uid}
-                                >
-                                  Админ
-                                </Button>
-                              )}
-                              {user.role !== 'moderator' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="h-8 text-[10px] px-2.5 border-blue-500/30 hover:bg-blue-500/10 text-blue-400"
-                                  onClick={() => handleUpdateRole(user.uid, 'moderator')}
-                                  disabled={actionLoading === user.uid}
-                                >
-                                  Модер
-                                </Button>
-                              )}
-                              {user.role !== 'user' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="h-8 text-[10px] px-2.5 border-zinc-500/30 hover:bg-zinc-500/10 text-zinc-300"
-                                  onClick={() => handleUpdateRole(user.uid, 'user')}
-                                  disabled={actionLoading === user.uid}
-                                >
-                                  Юзер
-                                </Button>
-                              )}
+                    {filteredUsers.map((user) => {
+                      const isPro = user.activePromoCode && user.activePromoCode.expiresAt > Date.now();
+                      return (
+                        <div 
+                          key={user.uid} 
+                          onClick={() => setSelectedUser(user)}
+                          className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border cursor-pointer gap-4 ${isPro ? 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-white/5'}`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+                              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.nickname}`} alt="Avatar" className="w-full h-full object-cover" />
                             </div>
-                          )}
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-zinc-100 text-base">{user.nickname}</span>
+                                {isPro && (
+                                  <span className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[9px] font-black uppercase rounded border border-amber-500/30">
+                                    <Crown size={10} /> PRO
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-zinc-400">{user.email}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                            <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg">
+                              {user.role === 'admin' && <ShieldAlert size={14} className="text-red-400" />}
+                              {user.role === 'moderator' && <ShieldCheck size={14} className="text-blue-400" />}
+                              {user.role === 'user' && <Users size={14} className="text-zinc-400" />}
+                              <span className={
+                                user.role === 'admin' ? 'text-red-400 text-xs font-bold uppercase tracking-wider' : 
+                                user.role === 'moderator' ? 'text-blue-400 text-xs font-bold uppercase tracking-wider' : 'text-zinc-400 text-xs font-bold uppercase tracking-wider'
+                              }>
+                                {user.role}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                    {users.length === 0 && (
+                      );
+                    })}
+                    {filteredUsers.length === 0 && (
                       <div className="py-8 text-center text-zinc-500">
                         Пользователи не найдены
                       </div>
@@ -393,6 +461,16 @@ export default function Dashboard() {
           </>
         )}
       </Tabs>
+
+      {selectedUser && (
+        <UserAdminModal
+          user={selectedUser}
+          isOpen={!!selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onUpdateUser={handleUpdateUser}
+          isAdmin={isAdmin}
+        />
+      )}
     </div>
   );
 }

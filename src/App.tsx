@@ -15,7 +15,7 @@ import Dashboard from './pages/Dashboard';
 import { useAppStore } from './store/useAppStore';
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { UserProfile } from './types';
 
 export default function App() {
@@ -24,28 +24,42 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeDoc: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = undefined;
+      }
+
       if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
+        unsubscribeDoc = onSnapshot(doc(db, 'users', user.uid), (userDoc) => {
           if (userDoc.exists()) {
-            setUserProfile(userDoc.data() as UserProfile);
+            const profile = userDoc.data() as UserProfile;
+            setUserProfile(profile);
+            // Sync active promo code from profile if it exists
+            if (profile.activePromoCode !== undefined) {
+              useAppStore.getState().setActivePromoCode(profile.activePromoCode);
+            }
           } else {
             setUserProfile(null);
           }
-        } catch (error) {
+          setAuthReady(true);
+        }, (error) => {
           console.error("Error fetching user profile:", error);
-          // If Firestore is unavailable, we still want to set auth ready
-          // so the app doesn't hang on a loading screen
           setUserProfile(null);
-        }
+          setAuthReady(true);
+        });
       } else {
         setUserProfile(null);
+        setAuthReady(true);
       }
-      setAuthReady(true);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, [setUserProfile, setAuthReady]);
 
   const isStaff = userProfile?.role === 'admin' || 
