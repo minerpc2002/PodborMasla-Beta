@@ -344,9 +344,9 @@ export async function searchByVin(vin: string, mileage?: string, conditions?: st
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
-   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
-   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
-   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
+   - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
+   - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.
+   - ANTIFREEZE: For European cars, explicitly state the standard (G11, G12, G12+, G12++, G13) in the fluid_type or description. Provide Ravenol and matching analogs from Motul/Bardahl.
 4. NO Liqui Moly.
 5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array.`;
   } else {
@@ -366,9 +366,10 @@ ${ravenolData.substring(0, 50000)}
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
-   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
-   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
-   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
+   - Use Ravenol products from the catalog as the primary source, then find matching analogs from Motul and Bardahl.
+   - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
+   - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.
+   - ANTIFREEZE: For European cars, explicitly state the standard (G11, G12, G12+, G12++, G13) in the fluid_type or description. Provide Ravenol and matching analogs from Motul/Bardahl.
 5. NO Liqui Moly.
 6. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array. Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
@@ -446,9 +447,9 @@ export async function searchByCarDetails(brand: string, model: string, year?: st
        - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
        - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
        - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
-       - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
-       - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
-       - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
+       - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
+       - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.
+       - ANTIFREEZE: For European cars, explicitly state the standard (G11, G12, G12+, G12++, G13) in the fluid_type or description. Provide Ravenol and matching analogs from Motul/Bardahl.
     4. NO Liqui Moly.
     5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array.
     6. IMPORTANT: Add a note in the description of the first unit that this data is provided by AI because the official catalog was unreachable.`;
@@ -469,9 +470,10 @@ ${ravenolData.substring(0, 50000)}
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
-   - For EACH unit, you MUST provide AT LEAST 3-5 suitable products from different brands (Ravenol, Motul, Bardahl, Moly Green).
-   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
-   - For Coolant (Антифриз), provide both Ravenol and analogs from other brands.
+   - Use Ravenol products from the catalog as the primary source, then find matching analogs from Motul and Bardahl.
+   - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
+   - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.
+   - ANTIFREEZE: For European cars, explicitly state the standard (G11, G12, G12+, G12++, G13) in the fluid_type or description. Provide Ravenol and matching analogs from Motul/Bardahl.
 4. NO Liqui Moly.
 5. OUTPUT: Return JSON (Russian text). Ensure every unit has multiple products in the "products" array. Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
