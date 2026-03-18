@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - nickname: string (required, unique)
+    //   - email: string (required)
+    //   - role: string (required, enum: ['admin', 'moderator', 'user'])
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: nicknames
+    // Document ID: {nickname}
+    // Fields:
+    //   - uid: string (required)
+    //
+    // Collection: promocodes
+    // Document ID: {code}
+    // Fields:
+    //   - code: string (required)
+    //   - expiresAt: timestamp (required)
+    //   - maxAttempts: number (required)
+    //   - createdBy: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.token.email.lower() == "minerpc2002@gmail.com"
+      );
+    }
+
+    function isModerator() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'moderator' ||
+        isAdmin()
+      );
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'nickname', 'email', 'role', 'createdAt']) &&
+             data.uid is string &&
+             data.nickname is string && data.nickname.size() >= 3 && data.nickname.size() <= 20 &&
+             data.email is string &&
+             data.role in ['admin', 'moderator', 'user'] &&
+             data.createdAt is number;
+    }
+
+    function isValidPromoCode(data) {
+      return data.keys().hasAll(['code', 'expiresAt', 'maxAttempts', 'createdBy', 'createdAt']) &&
+             data.code is string && data.code.size() >= 1 &&
+             data.expiresAt is number &&
+             data.maxAttempts is number && data.maxAttempts > 0 &&
+             data.createdBy == request.auth.uid &&
+             data.createdAt is number;
+    }
+
+    // Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == 'user';
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && request.resource.data.role == resource.data.role && isValidUser(request.resource.data)) ||
+        isAdmin()
+      );
+    }
+
+    match /nicknames/{nickname} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /promocodes/{code} {
+      allow read: if isAuthenticated();
+      allow create: if isModerator() && isValidPromoCode(request.resource.data);
+      allow update: if isModerator() && isValidPromoCode(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

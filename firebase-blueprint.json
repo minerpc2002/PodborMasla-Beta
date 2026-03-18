@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with roles and basic info",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "nickname": { "type": "string", "description": "Unique user nickname" },
+        "email": { "type": "string", "description": "User email" },
+        "role": { "type": "string", "enum": ["admin", "moderator", "user"], "description": "User role for RBAC" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["uid", "nickname", "email", "role"]
+    },
+    "PromoCode": {
+      "title": "PromoCode",
+      "description": "Promotional code for search attempts",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "The promo code string" },
+        "expiresAt": { "type": "string", "format": "date-time", "description": "Expiration timestamp" },
+        "maxAttempts": { "type": "integer", "description": "Number of search attempts allowed" },
+        "createdBy": { "type": "string", "description": "UID of the admin/moderator who created it" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["code", "expiresAt", "maxAttempts", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/promocodes/{code}": {
+      "schema": "PromoCode",
+      "description": "Available promo codes"
+    }
+  }
+}

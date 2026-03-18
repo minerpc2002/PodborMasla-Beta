@@ -1,11 +1,67 @@
-<div align="center">
+# OilSelector Pro
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Современное веб-приложение онлайн-подборщика масел для автомобилей.
+Приложение адаптировано для запуска как обычный сайт, для деплоя через Vercel, а также для открытия внутри Telegram Web App.
 
-  <h1>Built with AI Studio</h2>
+## Технологический стек
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- React Router v7
+- Zustand (State management)
+- Lucide React (Icons)
+- Telegram Web App SDK
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Запуск локально
 
-</div>
+1. Установите зависимости:
+   ```bash
+   npm install
+   ```
+
+2. Запустите сервер для разработки:
+   ```bash
+   npm run dev
+   ```
+
+3. Откройте приложение в браузере по адресу `http://localhost:3000` (или другой порт, указанный в консоли).
+
+## Деплой на Vercel
+
+Проект полностью готов к деплою на Vercel без дополнительных настроек.
+
+1. Зарегистрируйтесь или войдите в [Vercel](https://vercel.com/).
+2. Нажмите **Add New...** -> **Project**.
+3. Импортируйте репозиторий с этим проектом из GitHub/GitLab/Bitbucket.
+4. Vercel автоматически определит, что это проект на Vite.
+5. Нажмите **Deploy**.
+6. После завершения деплоя вы получите ссылку на рабочее приложение.
+
+## Интеграция с Telegram Web App
+
+Приложение использует `@twa-dev/sdk` для интеграции с Telegram.
+Чтобы подключить его как Mini App:
+
+1. Создайте бота через [@BotFather](https://t.me/BotFather) в Telegram.
+2. Создайте Web App, привязав к нему URL вашего задеплоенного приложения (например, ссылку из Vercel).
+3. Откройте бота и запустите Web App. Приложение автоматически подстроит цвета под тему Telegram и развернется на весь экран.
+
+## Структура проекта
+
+- `/src/components` - переиспользуемые UI компоненты (кнопки, карточки, селекты).
+- `/src/pages` - страницы приложения (Главная, Подбор, Результат, Избранное, История).
+- `/src/data` - моковые данные (`mockData.ts`), которые в будущем можно заменить на API запросы.
+- `/src/store` - управление состоянием (история, избранное) с помощью Zustand.
+- `/src/types` - TypeScript интерфейсы.
+- `/src/lib` - утилиты (включая интеграцию с Telegram).
+
+## Подключение реальной базы данных
+
+В данный момент приложение использует локальные моковые данные (`src/data/mockData.ts`).
+Для подключения реальной базы данных (например, Supabase, Firebase или собственного API):
+
+1. Создайте API клиент в `/src/lib/api.ts`.
+2. Замените вызовы функций из `mockData.ts` в компонентах на асинхронные запросы к вашему API.
+3. Обновите типы в `/src/types/index.ts` при необходимости.
