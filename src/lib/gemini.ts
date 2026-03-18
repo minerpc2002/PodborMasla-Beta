@@ -76,7 +76,7 @@ function getGeminiClient() {
 const FREE_MODELS = [
   'gemini-3-flash-preview',
   'gemini-3.1-flash-lite-preview',
-  'gemini-3.1-pro-preview'
+  'gemini-2.5-flash'
 ];
 
 let currentModelIndex = 0; // Global rotation index
@@ -343,6 +343,7 @@ export async function searchByVin(vin: string, mileage?: string, conditions?: st
    - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
    - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
    - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
    - If the car is Japanese, also include multiple options from Moly Green.
@@ -365,6 +366,7 @@ ${ravenolData.substring(0, 50000)}
    - For "factory_viscosity", list ALL viscosities mentioned in the catalog (e.g., "0W-20, 5W-30").
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
    - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
    - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
    - If the car is Japanese, also include multiple options from Moly Green.
@@ -445,6 +447,7 @@ export async function searchByCarDetails(brand: string, model: string, year?: st
     3. RECOMMENDATIONS:
        - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
        - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+       - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
        - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
        - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
        - If the car is Japanese, also include multiple options from Moly Green.
@@ -468,6 +471,7 @@ ${ravenolData.substring(0, 50000)}
    - For "factory_viscosity", list ALL viscosities mentioned in the catalog (e.g., "0W-20, 5W-30").
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+   - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
    - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
    - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
    - If the car is Japanese, also include multiple options from Moly Green.

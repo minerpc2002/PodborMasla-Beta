@@ -60,24 +60,24 @@ export default function Layout() {
         animate={{ y: 0, opacity: 1 }}
         className="sticky top-0 z-50 w-full liquid-glass border-b border-white/5 shadow-xl"
       >
-        <div className="flex h-16 items-center justify-between px-6 max-w-md mx-auto w-full">
-          <Link to="/" className="flex items-center gap-3 font-display font-bold text-lg tracking-tight">
+        <div className="flex h-16 items-center justify-between px-4 sm:px-6 max-w-md mx-auto w-full">
+          <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm tracking-tight shrink-0">
             <motion.div 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-blue-600 text-white p-1.5 rounded-xl shadow-lg shadow-blue-500/20"
             >
-              <Search size={20} strokeWidth={2.5} />
+              <Search size={16} strokeWidth={2.5} />
             </motion.div>
             <div className="flex flex-col leading-none">
-              <span className="text-zinc-50">MasloMARKET</span>
-              <span className="text-[10px] uppercase tracking-widest mt-0.5 font-black">
+              <span className="text-zinc-50 text-[13px]">MasloMARKET</span>
+              <span className="text-[8px] uppercase tracking-widest mt-0.5 font-black">
                 ПОДБОР <span className="shimmer-ai">AI</span>
               </span>
             </div>
           </Link>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {isStaff && (
               <Link to="/dashboard">
                 <motion.button
