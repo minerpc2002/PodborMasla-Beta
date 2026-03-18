@@ -75,8 +75,8 @@ function getGeminiClient() {
 
 const FREE_MODELS = [
   'gemini-3-flash-preview',
-  'gemini-3.1-pro-preview',
-  'gemini-flash-latest'
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-pro-preview'
 ];
 
 let currentModelIndex = 0; // Global rotation index
@@ -93,20 +93,16 @@ async function callGeminiWithRetry(ai: any, params: any, retries = 3): Promise<a
       
       const response = await ai.models.generateContent(params);
       
-      // Rotate model for the NEXT call to distribute load evenly
-      currentModelIndex = (currentModelIndex + 1) % FREE_MODELS.length;
-      
+      // On success, we stay on the current working model
       return response;
     } catch (error: any) {
       const errorMsg = error.message || '';
       console.error(`Gemini error (${currentModel}):`, errorMsg);
 
-      // Rotate immediately on error
-      currentModelIndex = (currentModelIndex + 1) % FREE_MODELS.length;
-
       const isQuotaError = errorMsg.includes('429') || 
                           errorMsg.includes('quota') || 
-                          errorMsg.includes('RESOURCE_EXHAUSTED');
+                          errorMsg.includes('RESOURCE_EXHAUSTED') ||
+                          errorMsg.includes('Too Many Requests');
 
       const isClientError = errorMsg.includes('400') || 
                            errorMsg.includes('INVALID_ARGUMENT') ||
@@ -121,6 +117,8 @@ async function callGeminiWithRetry(ai: any, params: any, retries = 3): Promise<a
         throw new Error(`Ошибка запроса к ИИ: ${errorMsg.substring(0, 100)}...`); // Don't retry on fatal client errors
       }
 
+      // Rotate immediately on error
+      currentModelIndex = (currentModelIndex + 1) % FREE_MODELS.length;
       attempt++;
       
       if (attempt < totalAttempts) {
