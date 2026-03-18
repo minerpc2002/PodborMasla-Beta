@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Users, Ticket, Plus, Trash2, Shield, ShieldAlert, ShieldCheck, Loader2, User, Search, Crown } from 'lucide-react';
 import UserAdminModal from '../components/UserAdminModal';
+import { auth } from '../firebase';
 
 export default function Dashboard() {
   const { userProfile } = useAppStore();
@@ -164,9 +165,11 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold font-display tracking-tight">Личный кабинет</h1>
           <p className="text-zinc-400 mt-1">Управление профилем и системными настройками</p>
         </div>
-        <div className="flex items-center gap-3 px-4 py-2 bg-blue-500/10 rounded-2xl border border-blue-500/20 backdrop-blur-md self-start md:self-center">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-          <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">{userProfile?.role}</span>
+        <div className="flex items-center gap-3 self-start md:self-center">
+          <div className="flex items-center gap-3 px-4 py-2 bg-blue-500/10 rounded-2xl border border-blue-500/20 backdrop-blur-md">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-sm font-semibold uppercase tracking-wider text-blue-400">{userProfile?.role}</span>
+          </div>
         </div>
       </div>
 
@@ -192,9 +195,11 @@ export default function Dashboard() {
 
         <TabsContent value="profile">
           <Card className="liquid-glass border-none">
-            <CardHeader>
-              <CardTitle>Ваш профиль</CardTitle>
-              <CardDescription>Основная информация о вашем аккаунте</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Ваш профиль</CardTitle>
+                <CardDescription>Основная информация о вашем аккаунте</CardDescription>
+              </div>
             </CardHeader>
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

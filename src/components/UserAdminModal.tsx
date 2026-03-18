@@ -109,30 +109,31 @@ export default function UserAdminModal({ user, isOpen, onClose, onUpdateUser, is
   const isProActive = user.activePromoCode && user.activePromoCode.expiresAt > Date.now();
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <Card className="w-full max-w-2xl border-none shadow-2xl animate-in fade-in zoom-in-95 duration-300 relative my-8">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto pt-10 pb-20">
+      <Card className="w-full max-w-2xl border-none shadow-2xl animate-in fade-in zoom-in-95 duration-300 relative my-auto">
         <button 
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-300 rounded-full hover:bg-zinc-800 transition-colors z-10"
+          className="absolute right-4 top-4 p-2.5 text-zinc-400 hover:text-zinc-300 rounded-full bg-zinc-900/80 hover:bg-zinc-800 transition-colors z-20 border border-white/10 shadow-lg"
+          aria-label="Close"
         >
-          <X size={20} />
+          <X size={24} />
         </button>
         
-        <CardHeader className="pb-4 pt-8">
+        <CardHeader className="pb-4 pt-10">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.nickname}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <CardTitle className="text-2xl font-display flex items-center gap-2">
-                {user.nickname}
+            <div className="min-w-0">
+              <CardTitle className="text-2xl font-display flex items-center gap-2 flex-wrap">
+                <span className="truncate">{user.nickname}</span>
                 {isProActive && (
-                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase rounded-lg border border-amber-500/30">
+                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase rounded-lg border border-amber-500/30 shrink-0">
                     PRO
                   </span>
                 )}
               </CardTitle>
-              <CardDescription className="text-base">{user.email}</CardDescription>
+              <CardDescription className="text-base truncate">{user.email}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -271,6 +272,16 @@ export default function UserAdminModal({ user, isOpen, onClose, onUpdateUser, is
                 Нет записей об активности
               </div>
             )}
+          </div>
+
+          <div className="pt-4">
+            <Button 
+              variant="outline" 
+              className="w-full border-zinc-700 text-zinc-400 hover:text-white"
+              onClick={onClose}
+            >
+              Закрыть
+            </Button>
           </div>
         </CardContent>
       </Card>

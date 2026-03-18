@@ -46,7 +46,7 @@ const carDataSchema = {
     engine_code: { type: Type.STRING },
     engine_type: { type: Type.STRING, description: "'petrol', 'diesel', 'hybrid', or 'gas'" },
     drive: { type: Type.STRING, description: "'fwd', 'rwd', or 'awd'" },
-    transmission_type: { type: Type.STRING, description: "'mt', 'at', 'cvt', or 'dsg'" },
+    transmission_type: { type: Type.STRING, description: "'mt', 'at', 'cvt', 'dsg', or 'robot'" },
     recommendations: { type: Type.ARRAY, items: recommendationSchema }
   },
   required: ["id", "brand", "model", "year_from", "year_to", "generation", "engine", "engine_code", "engine_type", "drive", "transmission_type", "recommendations"]
@@ -343,6 +343,7 @@ export async function searchByVin(vin: string, mileage?: string, conditions?: st
    - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+   - TRANSMISSION: If the car has a robotic transmission (DSG, DCT, PDK, Powershift, etc.), explicitly label the unit as 'Робот (DSG/DCT)' and provide specific fluids for it. Do not just call it 'АКПП'.
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
    - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
    - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.
@@ -365,6 +366,7 @@ ${ravenolData.substring(0, 50000)}
    - For "factory_viscosity", list ALL viscosities mentioned in the catalog (e.g., "0W-20, 5W-30").
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+   - TRANSMISSION: If the car has a robotic transmission (DSG, DCT, PDK, Powershift, etc.), explicitly label the unit as 'Робот (DSG/DCT)' and provide specific fluids for it. Do not just call it 'АКПП'.
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
    - Use Ravenol products from the catalog as the primary source, then find matching analogs from Motul and Bardahl.
    - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
@@ -446,6 +448,7 @@ export async function searchByCarDetails(brand: string, model: string, year?: st
     3. RECOMMENDATIONS:
        - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
        - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
+       - TRANSMISSION: If the car has a robotic transmission (DSG, DCT, PDK, Powershift, etc.), explicitly label the unit as 'Робот (DSG/DCT)' and provide specific fluids for it. Do not just call it 'АКПП'.
        - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА БЕЗ ИСКЛЮЧЕНИЯ.
        - For EACH unit, provide multiple products (2-3+) from EACH brand: Ravenol, Motul, and Bardahl.
        - MOLY GREEN: Include Moly Green ONLY if the car is Japanese (JDM). For European, American, or Korean cars, DO NOT include Moly Green.

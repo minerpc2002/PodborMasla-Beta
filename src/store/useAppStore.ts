@@ -111,6 +111,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({ 
         favorites: state.favorites, 
         history: state.history,
+        dynamicCars: state.dynamicCars,
         searchTimestamps: state.searchTimestamps,
         activePromoCode: state.activePromoCode
       }),
