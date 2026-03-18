@@ -20,7 +20,7 @@ const productSchema = {
 const recommendationSchema = {
   type: Type.OBJECT,
   properties: {
-    unit: { type: Type.STRING, description: "Название узла на РУССКОМ языке (например: 'Двигатель', 'АКПП', 'Раздаточная коробка', 'Передний мост', 'Задний мост', 'ГУР', 'Антифриз')" },
+    unit: { type: Type.STRING, description: "Название узла на РУССКОМ языке. ОБЯЗАТЕЛЬНО включи: 'Двигатель', 'АКПП/МКПП', 'Раздаточная коробка', 'Передний мост', 'Задний мост', 'ГУР', 'Тормозная жидкость', 'Антифриз'" },
     fluid_type: { type: Type.STRING },
     factory_viscosity: { type: Type.STRING, description: "Вязкость, рекомендованная заводом-изготовителем" },
     recommended_viscosity: { type: Type.STRING, description: "Вязкость, рекомендованная с учетом пробега и условий эксплуатации" },
@@ -344,8 +344,10 @@ export async function searchByVin(vin: string, mileage?: string, conditions?: st
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - Provide all suitable products from Ravenol, Motul, and Bardahl for each unit.
-   - If the car is Japanese, also include options from Moly Green.
+   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
+   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
+   - If the car is Japanese, also include multiple options from Moly Green.
+   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
 4. NO Liqui Moly.
 5. OUTPUT: Return JSON (Russian text).`;
   } else {
@@ -365,8 +367,10 @@ ${ravenolData.substring(0, 50000)}
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - Provide all suitable products from Ravenol (mentioned in the catalog), Motul, and Bardahl for each unit.
-   - If the car is Japanese, also include options from Moly Green.
+   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
+   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
+   - If the car is Japanese, also include multiple options from Moly Green.
+   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
 5. NO Liqui Moly.
 6. OUTPUT: Return JSON (Russian text). Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
@@ -379,7 +383,7 @@ ${ravenolData.substring(0, 50000)}
       config: {
         responseMimeType: 'application/json',
         responseSchema: carDataSchema,
-        temperature: 0.2,
+        temperature: 0.3,
       }
     });
 
@@ -399,8 +403,7 @@ ${ravenolData.substring(0, 50000)}
       carData.recommendations.forEach(rec => {
         if (rec.products) {
           rec.products = rec.products.filter(p => 
-            !p.brand_name.toLowerCase().includes('liqui') && 
-            !p.brand_name.toLowerCase().includes('moly')
+            !p.brand_name.toLowerCase().includes('liqui')
           );
         }
       });
@@ -444,8 +447,10 @@ export async function searchByCarDetails(brand: string, model: string, year?: st
        - IMPORTANT: For each product, list ONLY the approvals and specifications that are DIRECTLY RELEVANT to this specific car's requirements. Do not list all approvals the product has.
        - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
        - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-       - Provide all suitable products from Ravenol, Motul, and Bardahl for each unit.
-       - If the car is Japanese, also include options from Moly Green.
+       - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol.
+       - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
+       - If the car is Japanese, also include multiple options from Moly Green.
+       - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
     4. NO Liqui Moly.
     5. OUTPUT: Return JSON (Russian text). 
     6. IMPORTANT: Add a note in the description of the first unit that this data is provided by AI because the official catalog was unreachable.`;
@@ -466,8 +471,10 @@ ${ravenolData.substring(0, 50000)}
    - Adjust "recommended_viscosity" based on: Mileage: ${mileage || 'Not specified'}, Conditions: ${conditions || 'Normal'}, Power: ${power || 'Not specified'}, Hand Drive: ${handDrive || 'Not specified'}, Fuel Type: ${fuelType || 'Not specified'}.
    - CRITICAL: You MUST include ALL relevant units for this vehicle: Engine (Двигатель), Transmission (АКПП/МКПП/Вариатор/Робот), Front Differential (Передний мост), Rear Differential (Задний мост), Transfer Case (Раздаточная коробка), Power Steering (ГУР), Brake Fluid (Тормозная жидкость), and Coolant (Антифриз).
    - ОБЯЗАТЕЛЬНО ВЫВЕДИ ВСЕ МАСЛА И АНАЛОГИ ДЛЯ КАЖДОГО УЗЛА, ВКЛЮЧАЯ ГУР, ТОРМОЗНУЮ ЖИДКОСТЬ, МОСТЫ И АНТИФРИЗ.
-   - Provide all suitable products from Ravenol (mentioned in the catalog), Motul, and Bardahl for each unit.
-   - If the car is Japanese, also include options from Moly Green.
+   - For EACH unit, you MUST provide AS MANY suitable products as possible from Ravenol mentioned in the catalog. 
+   - Also provide AS MANY suitable options as possible from Motul and Bardahl for each unit.
+   - If the car is Japanese, also include multiple options from Moly Green.
+   - Do not limit yourself to one product per brand; if there are multiple suitable ones (e.g., different lines like VMP, DXG, etc.), list them ALL.
 4. NO Liqui Moly.
 5. OUTPUT: Return JSON (Russian text). Ensure "factory_viscosity" and "volume_liters" are exactly as in the catalog.`;
   }
@@ -500,8 +507,7 @@ ${ravenolData.substring(0, 50000)}
       carData.recommendations.forEach(rec => {
         if (rec.products) {
           rec.products = rec.products.filter(p => 
-            !p.brand_name.toLowerCase().includes('liqui') && 
-            !p.brand_name.toLowerCase().includes('moly')
+            !p.brand_name.toLowerCase().includes('liqui')
           );
         }
       });
