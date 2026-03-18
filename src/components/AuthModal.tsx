@@ -9,6 +9,8 @@ import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, getRe
 import { doc, getDoc, setDoc, runTransaction, Timestamp } from 'firebase/firestore';
 import { UserProfile, PromoCode } from '../types';
 
+import { isTelegramWebApp } from '../lib/telegram';
+
 export default function AuthModal() {
   const { userProfile, isAuthReady, setActivePromoCode } = useAppStore();
   const [nameInput, setNameInput] = useState('');
@@ -57,7 +59,8 @@ export default function AuthModal() {
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      // Try popup first
+      
+      // If inside Telegram Web App, popup might not work reliably, so we can try popup but fallback aggressively
       try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
@@ -69,23 +72,22 @@ export default function AuthModal() {
         }
       } catch (popupErr: any) {
         console.warn('Popup failed, trying redirect...', popupErr);
-        // If popup is blocked or not supported, fallback to redirect
-        if (
-          popupErr.code === 'auth/popup-blocked' || 
-          popupErr.code === 'auth/operation-not-supported-in-this-environment' ||
-          popupErr.code === 'auth/popup-closed-by-user'
-        ) {
-          await signInWithRedirect(auth, provider);
-        } else if (popupErr.code === 'auth/unauthorized-domain') {
-          throw new Error('Домен не авторизован в Firebase Console. Добавьте ваш Vercel домен в Authorized Domains.');
-        } else {
-          throw popupErr;
+        // If user explicitly closed, don't redirect
+        if (popupErr.code === 'auth/popup-closed-by-user') {
+          setLoading(false);
+          return;
         }
+        
+        if (popupErr.code === 'auth/unauthorized-domain') {
+          throw new Error('Домен не авторизован в Firebase Console. Добавьте ваш Vercel домен в Authorized Domains.');
+        }
+        
+        // Fallback to redirect for any other error (especially in Telegram Desktop/Mobile)
+        await signInWithRedirect(auth, provider);
       }
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Ошибка при входе через Google');
-    } finally {
       setLoading(false);
     }
   };

@@ -19,10 +19,18 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
   const [status, setStatus] = useState({ remainingAttempts: 2, totalAttempts: 2, minutesUntilReset: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isReplacing, setIsReplacing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingPromo, setPendingPromo] = useState<PromoCode | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setStatus(getSearchStatus());
+      setIsReplacing(false);
+      setShowConfirm(false);
+      setPendingPromo(null);
+      setPromoInput('');
+      setError('');
     }
   }, [isOpen, getSearchStatus]);
 
@@ -51,14 +59,29 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
         return;
       }
 
-      setActivePromoCode(promoData);
-      setStatus(getSearchStatus());
-      onClose();
+      if (isPromoActive) {
+        setPendingPromo(promoData);
+        setShowConfirm(true);
+      } else {
+        applyPromoCode(promoData);
+      }
     } catch (err) {
       console.error('Error activating promo code:', err);
       setError('Ошибка при активации промокода');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const applyPromoCode = (promoData: PromoCode) => {
+    setActivePromoCode(promoData);
+    setStatus(getSearchStatus());
+    onClose();
+  };
+
+  const handleConfirmReplace = () => {
+    if (pendingPromo) {
+      applyPromoCode(pendingPromo);
     }
   };
 
@@ -86,7 +109,40 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
           <X size={20} />
         </button>
         
-        {isPromoActive ? (
+        {showConfirm ? (
+          <>
+            <CardHeader className="space-y-3 pb-4 pt-8">
+              <div className="w-12 h-12 bg-amber-900/30 rounded-full flex items-center justify-center mb-2 mx-auto">
+                <Gift className="text-amber-400" size={24} />
+              </div>
+              <CardTitle className="text-2xl text-center font-display text-amber-500">Внимание</CardTitle>
+              <CardDescription className="text-center text-base">
+                У вас уже активен промокод <span className="font-bold text-zinc-100">{activePromoCode?.code}</span>. 
+                При активации нового промокода <span className="font-bold text-zinc-100">{pendingPromo?.code}</span>, старый будет сброшен.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                onClick={handleConfirmReplace}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white" 
+                size="lg"
+              >
+                Подтвердить и заменить
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowConfirm(false);
+                  setPendingPromo(null);
+                }}
+                variant="ghost"
+                className="w-full text-zinc-400 hover:text-white" 
+                size="lg"
+              >
+                Отмена
+              </Button>
+            </CardContent>
+          </>
+        ) : isPromoActive && !isReplacing ? (
           <>
             <CardHeader className="space-y-3 pb-4 pt-8">
               <div className="w-12 h-12 bg-emerald-900/30 rounded-full flex items-center justify-center mb-2 mx-auto">
@@ -126,13 +182,23 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
                 )}
               </div>
 
-              <Button 
-                onClick={onClose}
-                className="w-full mt-6 bg-zinc-100 hover:bg-zinc-200 text-zinc-900" 
-                size="lg"
-              >
-                Отлично
-              </Button>
+              <div className="flex flex-col gap-2 mt-6">
+                <Button 
+                  onClick={onClose}
+                  className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-900" 
+                  size="lg"
+                >
+                  Отлично
+                </Button>
+                <Button 
+                  onClick={() => setIsReplacing(true)}
+                  variant="ghost"
+                  className="w-full text-zinc-400 hover:text-white" 
+                  size="sm"
+                >
+                  Ввести другой промокод
+                </Button>
+              </div>
             </CardContent>
           </>
         ) : (
@@ -179,14 +245,27 @@ export default function PromoModal({ isOpen, onClose }: PromoModalProps) {
                   {error && <p className="text-xs text-red-500 text-center mt-2">{error}</p>}
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white" 
-                  size="lg"
-                  disabled={!promoInput.trim() || loading}
-                >
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : 'Активировать'}
-                </Button>
+                <div className="flex flex-col gap-2 mt-4">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" 
+                    size="lg"
+                    disabled={!promoInput.trim() || loading}
+                  >
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : 'Активировать'}
+                  </Button>
+                  {isReplacing && (
+                    <Button 
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsReplacing(false)}
+                      className="w-full text-zinc-400 hover:text-white" 
+                      size="sm"
+                    >
+                      Назад
+                    </Button>
+                  )}
+                </div>
               </form>
             </CardContent>
           </>

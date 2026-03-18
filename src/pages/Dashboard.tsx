@@ -139,20 +139,20 @@ export default function Dashboard() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-zinc-900/40 p-1 border border-white/5 backdrop-blur-xl rounded-2xl inline-flex">
-          <TabsTrigger value="profile" className="flex items-center gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+        <TabsList className="bg-zinc-900/40 p-1 border border-white/5 backdrop-blur-xl rounded-2xl flex w-full sm:w-auto overflow-x-auto no-scrollbar justify-start">
+          <TabsTrigger value="profile" className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all whitespace-nowrap">
             <User size={18} />
-            <span className="hidden sm:inline">Профиль</span>
+            <span>Профиль</span>
           </TabsTrigger>
           {isStaff && (
             <>
-              <TabsTrigger value="users" className="flex items-center gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+              <TabsTrigger value="users" className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all whitespace-nowrap">
                 <Users size={18} />
-                <span className="hidden sm:inline">Пользователи</span>
+                <span>Пользователи</span>
               </TabsTrigger>
-              <TabsTrigger value="promo" className="flex items-center gap-2 px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all">
+              <TabsTrigger value="promo" className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all whitespace-nowrap">
                 <Ticket size={18} />
-                <span className="hidden sm:inline">Промокоды</span>
+                <span>Промокоды</span>
               </TabsTrigger>
             </>
           )}
@@ -205,77 +205,70 @@ export default function Dashboard() {
                   <CardDescription>Список всех зарегистрированных пользователей</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto -mx-6 px-6">
-                    <table className="w-full text-left min-w-[600px]">
-                      <thead>
-                        <tr className="border-b border-zinc-800 text-zinc-400 text-sm">
-                          <th className="pb-4 font-medium">Никнейм</th>
-                          <th className="pb-4 font-medium">Email</th>
-                          <th className="pb-4 font-medium">Роль</th>
-                          {isAdmin && <th className="pb-4 font-medium text-right">Действия</th>}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-800/50">
-                        {users.map((user) => (
-                          <tr key={user.uid} className="text-sm group hover:bg-white/5 transition-colors">
-                            <td className="py-4 font-medium">{user.nickname}</td>
-                            <td className="py-4 text-zinc-400">{user.email}</td>
-                            <td className="py-4">
-                              <div className="flex items-center gap-1.5">
-                                {user.role === 'admin' && <ShieldAlert size={14} className="text-red-400" />}
-                                {user.role === 'moderator' && <ShieldCheck size={14} className="text-blue-400" />}
-                                {user.role === 'user' && <Users size={14} className="text-zinc-400" />}
-                                <span className={
-                                  user.role === 'admin' ? 'text-red-400' : 
-                                  user.role === 'moderator' ? 'text-blue-400' : 'text-zinc-400'
-                                }>
-                                  {user.role}
-                                </span>
-                              </div>
-                            </td>
-                            {isAdmin && (
-                              <td className="py-4 text-right">
-                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  {user.role !== 'admin' && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline" 
-                                      className="h-8 text-xs border-red-500/30 hover:bg-red-500/10"
-                                      onClick={() => handleUpdateRole(user.uid, 'admin')}
-                                      disabled={actionLoading === user.uid}
-                                    >
-                                      Админ
-                                    </Button>
-                                  )}
-                                  {user.role !== 'moderator' && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline" 
-                                      className="h-8 text-xs border-blue-500/30 hover:bg-blue-500/10"
-                                      onClick={() => handleUpdateRole(user.uid, 'moderator')}
-                                      disabled={actionLoading === user.uid}
-                                    >
-                                      Модератор
-                                    </Button>
-                                  )}
-                                  {user.role !== 'user' && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline" 
-                                      className="h-8 text-xs border-zinc-500/30 hover:bg-zinc-500/10"
-                                      onClick={() => handleUpdateRole(user.uid, 'user')}
-                                      disabled={actionLoading === user.uid}
-                                    >
-                                      Юзер
-                                    </Button>
-                                  )}
-                                </div>
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {users.map((user) => (
+                      <div key={user.uid} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border border-white/5 gap-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-zinc-100 text-base">{user.nickname}</span>
+                          <span className="text-xs text-zinc-400">{user.email}</span>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                          <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg">
+                            {user.role === 'admin' && <ShieldAlert size={14} className="text-red-400" />}
+                            {user.role === 'moderator' && <ShieldCheck size={14} className="text-blue-400" />}
+                            {user.role === 'user' && <Users size={14} className="text-zinc-400" />}
+                            <span className={
+                              user.role === 'admin' ? 'text-red-400 text-xs font-bold uppercase tracking-wider' : 
+                              user.role === 'moderator' ? 'text-blue-400 text-xs font-bold uppercase tracking-wider' : 'text-zinc-400 text-xs font-bold uppercase tracking-wider'
+                            }>
+                              {user.role}
+                            </span>
+                          </div>
+                          {isAdmin && (
+                            <div className="flex gap-1.5">
+                              {user.role !== 'admin' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-8 text-[10px] px-2.5 border-red-500/30 hover:bg-red-500/10 text-red-400"
+                                  onClick={() => handleUpdateRole(user.uid, 'admin')}
+                                  disabled={actionLoading === user.uid}
+                                >
+                                  Админ
+                                </Button>
+                              )}
+                              {user.role !== 'moderator' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-8 text-[10px] px-2.5 border-blue-500/30 hover:bg-blue-500/10 text-blue-400"
+                                  onClick={() => handleUpdateRole(user.uid, 'moderator')}
+                                  disabled={actionLoading === user.uid}
+                                >
+                                  Модер
+                                </Button>
+                              )}
+                              {user.role !== 'user' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-8 text-[10px] px-2.5 border-zinc-500/30 hover:bg-zinc-500/10 text-zinc-300"
+                                  onClick={() => handleUpdateRole(user.uid, 'user')}
+                                  disabled={actionLoading === user.uid}
+                                >
+                                  Юзер
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {users.length === 0 && (
+                      <div className="py-8 text-center text-zinc-500">
+                        Пользователи не найдены
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -349,67 +342,50 @@ export default function Dashboard() {
                   <CardDescription>Список всех созданных промокодов</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto -mx-6 px-6">
-                    <table className="w-full text-left min-w-[600px]">
-                      <thead>
-                        <tr className="border-b border-zinc-800 text-zinc-400 text-sm">
-                          <th className="pb-4 font-medium">Код</th>
-                          <th className="pb-4 font-medium">Попыток</th>
-                          <th className="pb-4 font-medium">Истекает</th>
-                          <th className="pb-4 font-medium">Статус</th>
-                          {isAdmin && <th className="pb-4 font-medium text-right">Действия</th>}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-800/50">
-                        {promoCodes.map((promo) => {
-                          const isExpired = promo.expiresAt < Date.now();
-                          return (
-                            <tr key={promo.code} className="text-sm group hover:bg-white/5 transition-colors">
-                              <td className="py-4 font-mono font-bold text-blue-400">
-                                <button 
-                                  onClick={() => copyToClipboard(promo.code)}
-                                  className="hover:underline cursor-pointer"
-                                  title="Копировать"
-                                >
-                                  {promo.code}
-                                </button>
-                              </td>
-                              <td className="py-4">{promo.maxAttempts}</td>
-                              <td className="py-4 text-zinc-400">
-                                {new Date(promo.expiresAt).toLocaleDateString()}
-                              </td>
-                              <td className="py-4">
-                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                  isExpired ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
-                                }`}>
-                                  {isExpired ? 'Истек' : 'Активен'}
-                                </span>
-                              </td>
-                              {isAdmin && (
-                                <td className="py-4 text-right">
-                                  <Button 
-                                    size="icon" 
-                                    variant="ghost" 
-                                    className="h-8 w-8 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => handleDeletePromo(promo.code)}
-                                    disabled={actionLoading === promo.code}
-                                  >
-                                    {actionLoading === promo.code ? <Loader2 className="animate-spin" size={14} /> : <Trash2 size={14} />}
-                                  </Button>
-                                </td>
-                              )}
-                            </tr>
-                          );
-                        })}
-                        {promoCodes.length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="py-8 text-center text-zinc-500">
-                              Промокоды не найдены
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {promoCodes.map((promo) => {
+                      const isExpired = promo.expiresAt < Date.now();
+                      return (
+                        <div key={promo.code} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 hover:bg-white/10 transition-colors rounded-2xl border border-white/5 gap-4">
+                          <div className="flex flex-col">
+                            <button 
+                              onClick={() => copyToClipboard(promo.code)}
+                              className="font-mono font-bold text-blue-400 text-left hover:underline text-lg tracking-widest"
+                              title="Копировать"
+                            >
+                              {promo.code}
+                            </button>
+                            <span className="text-xs text-zinc-400 mt-1">Истекает: {new Date(promo.expiresAt).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                            <div className="flex flex-col items-start sm:items-end bg-black/20 px-3 py-1.5 rounded-lg">
+                              <span className="text-xs text-zinc-300 font-medium">Попыток: {promo.maxAttempts}</span>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider mt-1 ${
+                                isExpired ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
+                              }`}>
+                                {isExpired ? 'Истек' : 'Активен'}
+                              </span>
+                            </div>
+                            {isAdmin && (
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className="h-9 w-9 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 bg-white/5 border border-white/5 shrink-0"
+                                onClick={() => handleDeletePromo(promo.code)}
+                                disabled={actionLoading === promo.code}
+                              >
+                                {actionLoading === promo.code ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {promoCodes.length === 0 && (
+                      <div className="py-8 text-center text-zinc-500">
+                        Промокоды не найдены
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
