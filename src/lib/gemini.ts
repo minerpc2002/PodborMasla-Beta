@@ -58,7 +58,8 @@ function getGeminiClient() {
   // We check multiple possible locations for the key
   const apiKey = (
     (process.env.GEMINI_API_KEY || '') || 
-    ((import.meta as any).env?.VITE_GEMINI_API_KEY || '')
+    ((import.meta as any).env?.VITE_GEMINI_API_KEY || '') ||
+    ((import.meta as any).env?.GEMINI_API_KEY || '')
   ).trim();
   
   if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey === 'undefined' || apiKey === 'null' || apiKey === '') {

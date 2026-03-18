@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { ShieldCheck, User, LogIn, Loader2 } from 'lucide-react';
 import { auth, db } from '../firebase';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, getRedirectResult } from 'firebase/auth';
 import { doc, getDoc, setDoc, runTransaction, Timestamp } from 'firebase/firestore';
 import { UserProfile, PromoCode } from '../types';
 
@@ -25,6 +25,28 @@ export default function AuthModal() {
     } else {
       setNeedsNickname(false);
     }
+
+    // Check for redirect result on mount
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+          if (!userDoc.exists()) {
+            setNeedsNickname(true);
+            setCurrentUser(result.user);
+          }
+        }
+      } catch (err: any) {
+        console.error('Redirect result error:', err);
+        if (err.code === 'auth/unauthorized-domain') {
+          setError('Этот домен не добавлен в список разрешенных в консоли Firebase.');
+        } else {
+          setError('Ошибка при входе через Google (Redirect)');
+        }
+      }
+    };
+    checkRedirect();
   }, [isAuthReady, auth.currentUser, userProfile]);
 
   if (!isAuthReady) return null;
@@ -35,17 +57,34 @@ export default function AuthModal() {
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        setNeedsNickname(true);
-        setCurrentUser(user);
+      // Try popup first
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          setNeedsNickname(true);
+          setCurrentUser(user);
+        }
+      } catch (popupErr: any) {
+        console.warn('Popup failed, trying redirect...', popupErr);
+        // If popup is blocked or not supported, fallback to redirect
+        if (
+          popupErr.code === 'auth/popup-blocked' || 
+          popupErr.code === 'auth/operation-not-supported-in-this-environment' ||
+          popupErr.code === 'auth/popup-closed-by-user'
+        ) {
+          await signInWithRedirect(auth, provider);
+        } else if (popupErr.code === 'auth/unauthorized-domain') {
+          throw new Error('Домен не авторизован в Firebase Console. Добавьте ваш Vercel домен в Authorized Domains.');
+        } else {
+          throw popupErr;
+        }
       }
     } catch (err: any) {
       console.error(err);
-      setError('Ошибка при входе через Google');
+      setError(err.message || 'Ошибка при входе через Google');
     } finally {
       setLoading(false);
     }
