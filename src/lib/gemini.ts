@@ -53,18 +53,21 @@ const carDataSchema = {
 };
 
 function getGeminiClient() {
-  // AI Studio injects the API key into process.env.GEMINI_API_KEY
-  // vite.config.ts exposes this to the client via the define plugin
-  // We check multiple possible locations for the key
-  const apiKey = (
-    (process.env.GEMINI_API_KEY || '') || 
-    ((import.meta as any).env?.VITE_GEMINI_API_KEY || '') ||
-    ((import.meta as any).env?.GEMINI_API_KEY || '')
-  ).trim();
+  // 1. Try VITE_ prefix (Standard for Vite/Vercel)
+  // 2. Try process.env (AI Studio injection via define)
+  let apiKey = '';
   
-  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey === 'undefined' || apiKey === 'null' || apiKey === '') {
-    console.error('Gemini API Key is missing or invalid:', apiKey);
-    throw new Error('API ключ Gemini не настроен. Пожалуйста, проверьте настройки Secrets в AI Studio.');
+  try { apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY; } catch (e) {}
+  
+  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+    try { apiKey = process.env.GEMINI_API_KEY; } catch (e) {}
+  }
+  
+  apiKey = (apiKey || '').trim();
+  
+  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey === 'undefined' || apiKey === 'null') {
+    console.error('Gemini API Key is missing. Checked import.meta.env.VITE_GEMINI_API_KEY and process.env.GEMINI_API_KEY');
+    throw new Error('API ключ Gemini не настроен. Пожалуйста, добавьте VITE_GEMINI_API_KEY в настройки Vercel или Secrets в AI Studio.');
   }
 
   return new GoogleGenAI({ apiKey });
@@ -76,20 +79,30 @@ const FREE_MODELS = [
   'gemini-flash-latest'
 ];
 
+let currentModelIndex = 0; // Global rotation index
+
 async function callGeminiWithRetry(ai: any, params: any, retries = 3): Promise<any> {
-  let modelIndex = 0;
   let attempt = 0;
   const totalAttempts = retries * FREE_MODELS.length;
   
   while (attempt < totalAttempts) {
-    const currentModel = FREE_MODELS[modelIndex];
+    const currentModel = FREE_MODELS[currentModelIndex];
     try {
       params.model = currentModel;
       console.log(`Calling Gemini (${currentModel}), attempt ${attempt + 1}/${totalAttempts}...`);
-      return await ai.models.generateContent(params);
+      
+      const response = await ai.models.generateContent(params);
+      
+      // Rotate model for the NEXT call to distribute load evenly
+      currentModelIndex = (currentModelIndex + 1) % FREE_MODELS.length;
+      
+      return response;
     } catch (error: any) {
       const errorMsg = error.message || '';
       console.error(`Gemini error (${currentModel}):`, errorMsg);
+
+      // Rotate immediately on error
+      currentModelIndex = (currentModelIndex + 1) % FREE_MODELS.length;
 
       const isQuotaError = errorMsg.includes('429') || 
                           errorMsg.includes('quota') || 
@@ -103,34 +116,24 @@ async function callGeminiWithRetry(ai: any, params: any, retries = 3): Promise<a
       
       if (isClientError && !isQuotaError) {
         if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('API key not valid')) {
-          throw new Error('Указан неверный API ключ Gemini. Пожалуйста, проверьте настройки Secrets в AI Studio.');
+          throw new Error('Указан неверный API ключ Gemini. Проверьте правильность ключа в Vercel (VITE_GEMINI_API_KEY).');
         }
         throw new Error(`Ошибка запроса к ИИ: ${errorMsg.substring(0, 100)}...`); // Don't retry on fatal client errors
       }
 
-      // If it's a quota error, switch model immediately and don't wait too long
-      if (isQuotaError) {
-        console.warn(`Лимит исчерпан для ${currentModel}. Переключение на следующую модель...`);
-        modelIndex = (modelIndex + 1) % FREE_MODELS.length;
-        attempt++;
-        await new Promise(resolve => setTimeout(resolve, 200));
-        continue;
-      }
-
-      // For other transient errors (500, 503, RPC), use exponential backoff
-      modelIndex = (modelIndex + 1) % FREE_MODELS.length;
       attempt++;
       
       if (attempt < totalAttempts) {
-        const delay = Math.pow(2, Math.floor(attempt / FREE_MODELS.length)) * 1000;
-        console.warn(`Временная ошибка сервера. Повтор через ${delay}ms с моделью ${FREE_MODELS[modelIndex]}...`);
+        // Small delay before retry (shorter for quota errors to quickly switch)
+        const delay = isQuotaError ? 500 : Math.pow(2, Math.floor(attempt / FREE_MODELS.length)) * 1000;
+        console.warn(`Переключение на модель ${FREE_MODELS[currentModelIndex]} через ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       throw error;
     }
   }
-  throw new Error('Все доступные модели ИИ временно перегружены. Пожалуйста, попробуйте через минуту.');
+  throw new Error('Все доступные модели ИИ временно перегружены или исчерпали лимит. Пожалуйста, попробуйте через минуту.');
 }
 
 async function getGeminiVinHint(ai: any, vin: string): Promise<string | null> {
