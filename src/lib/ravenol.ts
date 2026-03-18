@@ -1,13 +1,35 @@
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 8000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+};
+
 export async function fetchRavenolData(query: string, hint?: string): Promise<string | null> {
   try {
     // 1. Search for the query (VIN or car details)
     const searchUrl = `https://podbor.ravenol.ru/search/?q=${encodeURIComponent(query)}`;
-    let searchRes = await fetch(`/api/proxy/ravenol?url=${encodeURIComponent(searchUrl)}`);
+    let searchRes;
+    try {
+      searchRes = await fetchWithTimeout(`/api/proxy/ravenol?url=${encodeURIComponent(searchUrl)}`);
+    } catch (e) {
+      searchRes = { ok: false };
+    }
     
     // Fallback to corsproxy.io if our proxy fails (e.g., Vercel IP blocked)
     if (!searchRes.ok) {
       console.warn('Vercel proxy failed for Ravenol search, trying corsproxy.io...');
-      searchRes = await fetch(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+      try {
+        searchRes = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(searchUrl)}`);
+      } catch (e) {
+        return null; // Both failed
+      }
     }
     
     if (!searchRes.ok) return null;
@@ -58,12 +80,21 @@ export async function fetchRavenolData(query: string, hint?: string): Promise<st
       const carUrl = `https://podbor.ravenol.ru${bestMatch}`;
 
       // 3. Fetch the car page via proxy
-      let carRes = await fetch(`/api/proxy/ravenol?url=${encodeURIComponent(carUrl)}`);
+      let carRes;
+      try {
+        carRes = await fetchWithTimeout(`/api/proxy/ravenol?url=${encodeURIComponent(carUrl)}`);
+      } catch (e) {
+        carRes = { ok: false };
+      }
       
       // Fallback to corsproxy.io if our proxy fails
       if (!carRes.ok) {
         console.warn('Vercel proxy failed for Ravenol car page, trying corsproxy.io...');
-        carRes = await fetch(`https://corsproxy.io/?${encodeURIComponent(carUrl)}`);
+        try {
+          carRes = await fetchWithTimeout(`https://corsproxy.io/?${encodeURIComponent(carUrl)}`);
+        } catch (e) {
+          return null;
+        }
       }
       
       if (!carRes.ok) return null;
